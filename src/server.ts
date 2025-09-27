@@ -9,12 +9,10 @@ const fastify = Fastify({
 const quoteService = new QuoteService();
 const dbService = new DatabaseService();
 
-// Simple health check route
 fastify.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
 });
 
-// Random quote endpoint (now saves to DB)
 fastify.get('/api/quote/random', async (request, reply) => {
   try {
     const quote = await quoteService.fetchRandomQuote();
@@ -29,7 +27,6 @@ fastify.get('/api/quote/random', async (request, reply) => {
   }
 });
 
-// Like quote endpoint
 fastify.post('/api/quote/:id/like', async (request, reply) => {
   const { id } = request.params as { id: string };
   try {
@@ -40,6 +37,19 @@ fastify.post('/api/quote/:id/like', async (request, reply) => {
       error: 'Not Found',
       message: 'Quote not found',
       statusCode: 404,
+    });
+  }
+});
+
+fastify.get('/api/quotes/liked', async (request, reply) => {
+  try {
+    const quotes = await dbService.getMostLikedQuotes(10);
+    return { quotes, total: quotes.length };
+  } catch (error) {
+    return reply.status(500).send({
+      error: 'Internal Server Error',
+      message: 'Failed to fetch liked quotes',
+      statusCode: 500,
     });
   }
 });

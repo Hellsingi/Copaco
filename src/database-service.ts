@@ -1,20 +1,5 @@
 import sqlite3 from 'sqlite3';
-import { Quote } from './types';
-
-interface QuoteRow {
-  id: string;
-  content: string;
-  author: string;
-  tags: string;
-  likes: number;
-  source: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface LikesRow {
-  likes: number;
-}
+import type { Quote, QuoteRow, LikesRow } from './interfaces';
 
 export class DatabaseService {
   private db: sqlite3.Database;

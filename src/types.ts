@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// External API response schemas
 export const ExternalQuoteSchema = z.object({
   _id: z.string(),
   content: z.string(),
@@ -27,7 +26,6 @@ export const QuoteSchema = z.object({
   updatedAt: z.date(),
 });
 
-// API request/response schemas
 export const LikeQuoteRequestSchema = z.object({
   quoteId: z.string(),
 });
@@ -41,19 +39,8 @@ export const RandomQuoteQuerySchema = z.object({
   preferLiked: z.string().transform((val: string) => val === 'true').default('false'),
 });
 
-// Types
-export type ExternalQuote = z.infer<typeof ExternalQuoteSchema>;
-export type DummyJsonQuote = z.infer<typeof DummyJsonQuoteSchema>;
-export type Quote = z.infer<typeof QuoteSchema>;
-export type LikeQuoteRequest = z.infer<typeof LikeQuoteRequestSchema>;
-export type SimilarQuotesRequest = z.infer<typeof SimilarQuotesRequestSchema>;
-export type RandomQuoteQuery = z.infer<typeof RandomQuoteQuerySchema>;
-
-// Error schemas
 export const ErrorResponseSchema = z.object({
   error: z.string(),
   message: z.string(),
   statusCode: z.number(),
 });
-
-export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;

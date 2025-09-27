@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { ExternalQuoteSchema, DummyJsonQuoteSchema, Quote } from './types';
+import { ExternalQuoteSchema, DummyJsonQuoteSchema } from './types';
+import type { Quote } from './interfaces';
 
 export class QuoteService {
   private readonly quotableUrl = 'https://api.quotable.io/random';
