@@ -16,7 +16,6 @@ describe('Debug Weighting', () => {
   });
 
   it('should debug weighting behavior', async () => {
-    // Create two simple quotes
     const quote1: Quote = {
       id: '1',
       content: 'Quote 1',
@@ -42,16 +41,13 @@ describe('Debug Weighting', () => {
     await dbService.saveQuote(quote1);
     await dbService.saveQuote(quote2);
 
-    // Add many likes to quote 2
     for (let i = 0; i < 15; i++) {
       await dbService.likeQuote('2');
     }
 
-    // Check final like counts
     const mostLiked = await dbService.getMostLikedQuotes(2);
     console.log('Quote likes:', mostLiked.map(q => ({ id: q.id, likes: q.likes })));
 
-    // Test random selection without weighting
     console.log('\n--- Random selection (preferLiked=false) ---');
     const randomSelections: Record<string, number> = {};
     for (let i = 0; i < 20; i++) {
@@ -62,7 +58,6 @@ describe('Debug Weighting', () => {
     }
     console.log('Random selections:', randomSelections);
 
-    // Test weighted selection
     console.log('\n--- Weighted selection (preferLiked=true) ---');
     const weightedSelections: Record<string, number> = {};
     for (let i = 0; i < 20; i++) {
@@ -73,7 +68,6 @@ describe('Debug Weighting', () => {
     }
     console.log('Weighted selections:', weightedSelections);
 
-    // This test always passes - it's just for debugging
     expect(true).toBe(true);
   });
 });

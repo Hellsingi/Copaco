@@ -148,7 +148,6 @@ export class DatabaseService {
   async getRandomQuoteWeighted(preferLiked: boolean = false): Promise<Quote | null> {
     return new Promise((resolve, reject) => {
       if (!preferLiked) {
-        // Regular random selection
         const sql = 'SELECT * FROM quotes ORDER BY RANDOM() LIMIT 1';
         this.db.get(sql, [], (err, row: QuoteRow | undefined) => {
           if (err) {
@@ -170,8 +169,6 @@ export class DatabaseService {
           }
         });
       } else {
-        // Weighted random selection strongly favoring liked quotes
-        // Using power of 3 for even stronger weighting
         const sql = `
           SELECT *, 
                  ((likes + 1) * (likes + 1) * (likes + 1)) as weight

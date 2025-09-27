@@ -113,7 +113,6 @@ describe('Smart Recommendations', () => {
 
   describe('Smart recommendations integration', () => {
     it('should provide weighted recommendations based on popularity', async () => {
-      // Create quotes with varying popularity
       const quotes: Quote[] = [
         {
           id: 'low-pop',
@@ -147,20 +146,17 @@ describe('Smart Recommendations', () => {
         },
       ];
 
-      // Save all quotes
       for (const quote of quotes) {
         await dbService.saveQuote(quote);
       }
 
-      // Create different popularity levels
-      await dbService.likeQuote('med-pop'); // 1 like
-      await dbService.likeQuote('med-pop'); // 2 likes
+      await dbService.likeQuote('med-pop');
+      await dbService.likeQuote('med-pop');
 
       for (let i = 0; i < 8; i++) {
-        await dbService.likeQuote('high-pop'); // 8 likes
+        await dbService.likeQuote('high-pop');
       }
 
-      // Test that most liked quotes are returned correctly
       const mostLiked = await dbService.getMostLikedQuotes(3);
       expect(mostLiked).toHaveLength(3);
       expect(mostLiked[0]?.id).toBe('high-pop');
@@ -170,7 +166,6 @@ describe('Smart Recommendations', () => {
       expect(mostLiked[2]?.id).toBe('low-pop');
       expect(mostLiked[2]?.likes).toBe(0);
 
-      // Test weighted selection favors popular quotes
       const selections: string[] = [];
       for (let i = 0; i < 30; i++) {
         const quote = await dbService.getRandomQuoteWeighted(true);
@@ -182,7 +177,6 @@ describe('Smart Recommendations', () => {
       const highPopSelections = selections.filter(id => id === 'high-pop').length;
       const lowPopSelections = selections.filter(id => id === 'low-pop').length;
 
-      // Popular quotes should be selected more frequently
       expect(highPopSelections).toBeGreaterThan(lowPopSelections);
       expect(selections.length).toBe(30);
     });

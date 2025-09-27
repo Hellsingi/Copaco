@@ -8,7 +8,6 @@ export class QuoteService {
 
   async fetchRandomQuote(): Promise<Quote> {
     try {
-      // Try quotable.io first
       const response = await axios.get(this.quotableUrl, {
         timeout: 5000,
       });
@@ -29,7 +28,6 @@ export class QuoteService {
       console.log('Quotable.io failed, trying DummyJSON...', error);
 
       try {
-        // Fallback to DummyJSON
         const response = await axios.get(`${this.dummyJsonUrl}/${Math.floor(Math.random() * 100) + 1}`, {
           timeout: 5000,
         });

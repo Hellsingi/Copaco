@@ -14,7 +14,6 @@ export const DummyJsonQuoteSchema = z.object({
   author: z.string(),
 });
 
-// Internal quote schema
 export const QuoteSchema = z.object({
   id: z.string(),
   content: z.string(),

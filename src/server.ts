@@ -18,7 +18,6 @@ fastify.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
 });
 
-// Get random quote from external APIs (always fresh)
 fastify.get('/api/quote/random', async (request, reply) => {
   try {
     const quote = await quoteService.fetchRandomQuote();
@@ -33,7 +32,6 @@ fastify.get('/api/quote/random', async (request, reply) => {
   }
 });
 
-// Get smart recommended quote from database with weighted selection
 fastify.get('/api/quote/recommended', async (request, reply) => {
   const query = request.query as { preferLiked?: string };
   const preferLiked = query.preferLiked === 'true';
@@ -42,7 +40,6 @@ fastify.get('/api/quote/recommended', async (request, reply) => {
     const quote = await dbService.getRandomQuoteWeighted(preferLiked);
 
     if (!quote) {
-      // If no quotes in database, fetch from external API
       const newQuote = await quoteService.fetchRandomQuote();
       await dbService.saveQuote(newQuote);
       return newQuote;
@@ -58,7 +55,6 @@ fastify.get('/api/quote/recommended', async (request, reply) => {
   }
 });
 
-// Get smart quote with additional context and stats
 fastify.get('/api/quote/smart', async (request, reply) => {
   const query = request.query as {
     preferLiked?: string;
@@ -73,7 +69,6 @@ fastify.get('/api/quote/smart', async (request, reply) => {
     const quote = await dbService.getRandomQuoteWeighted(preferLiked);
 
     if (!quote) {
-      // If no quotes in database, fetch from external API
       const newQuote = await quoteService.fetchRandomQuote();
       await dbService.saveQuote(newQuote);
 
