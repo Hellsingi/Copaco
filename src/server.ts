@@ -2,13 +2,13 @@ import Fastify from 'fastify';
 import { QuoteService } from './quote-service';
 
 const fastify = Fastify({
-  logger: true
+  logger: true,
 });
 
 const quoteService = new QuoteService();
 
 // Simple health check route
-fastify.get('/health', async (request, reply) => {
+fastify.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
 });
 
@@ -21,7 +21,7 @@ fastify.get('/api/quote/random', async (request, reply) => {
     return reply.status(500).send({
       error: 'Internal Server Error',
       message: 'Failed to fetch random quote',
-      statusCode: 500
+      statusCode: 500,
     });
   }
 });
