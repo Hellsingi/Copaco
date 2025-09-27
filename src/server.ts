@@ -18,6 +18,7 @@ fastify.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
 });
 
+// Get random quote from external APIs (always fresh)
 fastify.get('/api/quote/random', async (request, reply) => {
   try {
     const quote = await quoteService.fetchRandomQuote();
@@ -27,6 +28,88 @@ fastify.get('/api/quote/random', async (request, reply) => {
     return reply.status(500).send({
       error: 'Internal Server Error',
       message: 'Failed to fetch random quote',
+      statusCode: 500,
+    });
+  }
+});
+
+// Get smart recommended quote from database with weighted selection
+fastify.get('/api/quote/recommended', async (request, reply) => {
+  const query = request.query as { preferLiked?: string };
+  const preferLiked = query.preferLiked === 'true';
+
+  try {
+    const quote = await dbService.getRandomQuoteWeighted(preferLiked);
+
+    if (!quote) {
+      // If no quotes in database, fetch from external API
+      const newQuote = await quoteService.fetchRandomQuote();
+      await dbService.saveQuote(newQuote);
+      return newQuote;
+    }
+
+    return quote;
+  } catch (error) {
+    return reply.status(500).send({
+      error: 'Internal Server Error',
+      message: 'Failed to fetch recommended quote',
+      statusCode: 500,
+    });
+  }
+});
+
+// Get smart quote with additional context and stats
+fastify.get('/api/quote/smart', async (request, reply) => {
+  const query = request.query as {
+    preferLiked?: string;
+    includeStats?: string;
+    category?: string;
+  };
+
+  const preferLiked = query.preferLiked === 'true';
+  const includeStats = query.includeStats === 'true';
+
+  try {
+    const quote = await dbService.getRandomQuoteWeighted(preferLiked);
+
+    if (!quote) {
+      // If no quotes in database, fetch from external API
+      const newQuote = await quoteService.fetchRandomQuote();
+      await dbService.saveQuote(newQuote);
+
+      if (includeStats) {
+        return {
+          ...newQuote,
+          isNew: true,
+          totalQuotes: 1,
+          averageLikes: 0,
+        };
+      }
+
+      return newQuote;
+    }
+
+    if (includeStats) {
+      const totalQuotes = await dbService.getQuoteCount();
+      const likedQuotes = await dbService.getMostLikedQuotes(10);
+      const averageLikes = likedQuotes.length > 0
+        ? likedQuotes.reduce((sum, q) => sum + q.likes, 0) / likedQuotes.length
+        : 0;
+
+      return {
+        ...quote,
+        isNew: false,
+        totalQuotes,
+        averageLikes: Math.round(averageLikes * 100) / 100,
+        popularity: quote.likes > averageLikes ? 'high' : quote.likes > 0 ? 'medium' : 'low',
+      };
+    }
+
+    return quote;
+  } catch (error) {
+    return reply.status(500).send({
+      error: 'Internal Server Error',
+      message: 'Failed to fetch smart quote',
       statusCode: 500,
     });
   }
@@ -62,6 +145,7 @@ fastify.get('/api/quotes/liked', async (request, reply) => {
 const start = async () => {
   try {
     await fastify.listen({ port: 3000, host: '0.0.0.0' });
+    // eslint-disable-next-line no-console
     console.log('Server is running on http://localhost:3000');
   } catch (err) {
     fastify.log.error(err);
