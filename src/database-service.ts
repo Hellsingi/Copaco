@@ -6,10 +6,13 @@ export class DatabaseService {
 
   constructor(dbPath: string = './quotes.db') {
     this.db = new sqlite3.Database(dbPath);
-    this.initializeDatabase();
   }
 
-  private initializeDatabase(): void {
+  async initialize(): Promise<void> {
+    return this.initializeDatabase();
+  }
+
+  private initializeDatabase(): Promise<void> {
     const createQuotesTable = `
       CREATE TABLE IF NOT EXISTS quotes (
         id TEXT PRIMARY KEY,
@@ -23,12 +26,16 @@ export class DatabaseService {
       )
     `;
 
-    this.db.run(createQuotesTable, (err) => {
-      if (err) {
-        console.error('Error creating quotes table:', err);
-      } else {
-        console.log('Database initialized successfully');
-      }
+    return new Promise((resolve, reject) => {
+      this.db.run(createQuotesTable, (err) => {
+        if (err) {
+          console.error('Error creating quotes table:', err);
+          reject(err);
+        } else {
+          console.log('Database initialized successfully');
+          resolve();
+        }
+      });
     });
   }
 
@@ -90,14 +97,12 @@ export class DatabaseService {
 
   async likeQuote(id: string): Promise<number> {
     return new Promise((resolve, reject) => {
-      // First check if quote exists
       this.db.get('SELECT likes FROM quotes WHERE id = ?', [id], (err, row: LikesRow | undefined) => {
         if (err) {
           reject(err);
         } else if (!row) {
           reject(new Error('Quote not found'));
         } else {
-          // Update the likes count
           const sql = `
             UPDATE quotes
             SET likes = likes + 1, updated_at = CURRENT_TIMESTAMP 

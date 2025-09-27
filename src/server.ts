@@ -9,6 +9,11 @@ const fastify = Fastify({
 const quoteService = new QuoteService();
 const dbService = new DatabaseService();
 
+dbService.initialize().catch((err) => {
+  console.error('Failed to initialize database:', err);
+  process.exit(1);
+});
+
 fastify.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
 });
@@ -54,7 +59,6 @@ fastify.get('/api/quotes/liked', async (request, reply) => {
   }
 });
 
-// Start the server
 const start = async () => {
   try {
     await fastify.listen({ port: 3000, host: '0.0.0.0' });
