@@ -1,6 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { QuoteService } from '../quote-service';
 import { DatabaseService } from '../database-service';
+import {
+  RecommendedQuoteQuerySchema,
+  SmartQuoteQuerySchema,
+  SimilarQuotesRequestBodySchema,
+  LikeQuoteParamsSchema,
+} from '../types';
 
 export const registerRestRoutes = async (
   fastify: FastifyInstance,
@@ -26,10 +32,18 @@ export const registerRestRoutes = async (
   });
 
   fastify.get('/api/quote/recommended', async (request, reply) => {
-    const query = request.query as { preferLiked?: string };
-    const preferLiked = query.preferLiked === 'true';
-
     try {
+      const queryResult = RecommendedQuoteQuerySchema.safeParse(request.query);
+      if (!queryResult.success) {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'Invalid query parameters',
+          details: queryResult.error.issues,
+          statusCode: 400,
+        });
+      }
+
+      const { preferLiked } = queryResult.data;
       const quote = await dbService.getRandomQuoteWeighted(preferLiked);
 
       if (!quote) {
@@ -49,16 +63,18 @@ export const registerRestRoutes = async (
   });
 
   fastify.get('/api/quote/smart', async (request, reply) => {
-    const query = request.query as {
-      preferLiked?: string;
-      includeStats?: string;
-      category?: string;
-    };
-
-    const preferLiked = query.preferLiked === 'true';
-    const includeStats = query.includeStats === 'true';
-
     try {
+      const queryResult = SmartQuoteQuerySchema.safeParse(request.query);
+      if (!queryResult.success) {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'Invalid query parameters',
+          details: queryResult.error.issues,
+          statusCode: 400,
+        });
+      }
+
+      const { preferLiked, includeStats } = queryResult.data;
       const quote = await dbService.getRandomQuoteWeighted(preferLiked);
 
       if (!quote) {
@@ -104,8 +120,18 @@ export const registerRestRoutes = async (
   });
 
   fastify.post('/api/quote/:id/like', async (request, reply) => {
-    const { id } = request.params as { id: string };
     try {
+      const paramsResult = LikeQuoteParamsSchema.safeParse(request.params);
+      if (!paramsResult.success) {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'Invalid parameters',
+          details: paramsResult.error.issues,
+          statusCode: 400,
+        });
+      }
+
+      const { id } = paramsResult.data;
       const likes = await dbService.likeQuote(id);
       return { id, likes };
     } catch (error) {
@@ -131,28 +157,18 @@ export const registerRestRoutes = async (
   });
 
   fastify.post('/api/quotes/similar', async (request, reply) => {
-    const body = request.body as { content: string; limit?: string | number };
-    const { content } = body;
-
-    if (!content || typeof content !== 'string') {
-      return reply.status(400).send({
-        error: 'Bad Request',
-        message: 'Content is required and must be a string',
-        statusCode: 400,
-      });
-    }
-
-    const limit = body.limit ? parseInt(String(body.limit), 10) : 5;
-
-    if (isNaN(limit) || limit < 1 || limit > 20) {
-      return reply.status(400).send({
-        error: 'Bad Request',
-        message: 'Limit must be a number between 1 and 20',
-        statusCode: 400,
-      });
-    }
-
     try {
+      const bodyResult = SimilarQuotesRequestBodySchema.safeParse(request.body);
+      if (!bodyResult.success) {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'Invalid request body',
+          details: bodyResult.error.issues,
+          statusCode: 400,
+        });
+      }
+
+      const { content, limit } = bodyResult.data;
       const similarQuotes = await quoteService.findSimilarQuotes(content, limit);
       return {
         quotes: similarQuotes,

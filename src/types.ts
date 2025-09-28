@@ -37,3 +37,26 @@ export const SimilarQuotesRequestSchema = z.object({
 export const RandomQuoteQuerySchema = z.object({
   preferLiked: z.string().transform((val: string) => val === 'true').default('false'),
 });
+
+export const RecommendedQuoteQuerySchema = z.object({
+  preferLiked: z.string().optional().transform((val) => val === 'true'),
+});
+
+export const SmartQuoteQuerySchema = z.object({
+  preferLiked: z.string().optional().transform((val) => val === 'true'),
+  includeStats: z.string().optional().transform((val) => val === 'true'),
+  category: z.string().optional(),
+});
+
+export const SimilarQuotesRequestBodySchema = z.object({
+  content: z.string().min(1, 'Content is required and cannot be empty'),
+  limit: z.union([z.string(), z.number()]).optional()
+    .transform((val) => val ? parseInt(String(val), 10) : 5)
+    .refine((val) => !isNaN(val) && val >= 1 && val <= 20, {
+      message: 'Limit must be a number between 1 and 20',
+    }),
+});
+
+export const LikeQuoteParamsSchema = z.object({
+  id: z.string().min(1, 'Quote ID is required'),
+});
