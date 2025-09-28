@@ -84,16 +84,26 @@ describe('QuoteService', () => {
       );
     });
 
-    it('should throw error when both services fail', async () => {
+    it('should return fallback quote when both services fail', async () => {
       const quotableError = new Error('Quotable network error');
       const dummyError = new Error('DummyJSON network error');
 
       mockedAxios.get
         .mockRejectedValueOnce(quotableError)
         .mockRejectedValueOnce(dummyError);
-      await expect(quoteService.fetchRandomQuote()).rejects.toThrow(
-        'Unable to fetch quote from external services',
-      );
+
+      const result = await quoteService.fetchRandomQuote();
+
+      expect(result).toEqual({
+        id: 'fallback-1',
+        content: 'The only way to do great work is to love what you do.',
+        author: 'Steve Jobs',
+        tags: ['motivation', 'work'],
+        likes: 0,
+        source: 'fallback',
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+      });
 
       expect(mockedAxios.get).toHaveBeenCalledTimes(2);
     });

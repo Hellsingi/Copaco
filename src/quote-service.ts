@@ -6,6 +6,10 @@ export class QuoteService {
   private readonly quotableUrl = 'https://api.quotable.io/random';
   private readonly dummyJsonUrl = 'https://dummyjson.com/quotes';
 
+  private log(message: string): void {
+    process.stdout.write(`[QuoteService] ${message}\n`);
+  }
+
   async fetchRandomQuote(): Promise<Quote> {
     try {
       const response = await axios.get(this.quotableUrl, {
@@ -25,7 +29,8 @@ export class QuoteService {
         updatedAt: new Date(),
       };
     } catch (error) {
-      console.log('Quotable.io failed, trying DummyJSON...', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.log(`Quotable.io failed (${errorMessage}), trying DummyJSON...`);
 
       try {
         const response = await axios.get(`${this.dummyJsonUrl}/${Math.floor(Math.random() * 100) + 1}`, {
@@ -45,8 +50,19 @@ export class QuoteService {
           updatedAt: new Date(),
         };
       } catch (fallbackError) {
-        console.error('Both quote services failed:', fallbackError);
-        throw new Error('Unable to fetch quote from external services');
+        const fallbackErrorMessage = fallbackError instanceof Error ? fallbackError.message : 'Unknown error';
+        this.log(`DummyJSON also failed (${fallbackErrorMessage}), using fallback quote`);
+
+        return {
+          id: 'fallback-1',
+          content: 'The only way to do great work is to love what you do.',
+          author: 'Steve Jobs',
+          tags: ['motivation', 'work'],
+          likes: 0,
+          source: 'fallback',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
       }
     }
   }
