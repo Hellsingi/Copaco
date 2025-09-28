@@ -8,6 +8,16 @@ import {
   LikeQuoteParamsSchema,
 } from '../types';
 
+const getPopularityLevel = (likes: number, averageLikes: number): string => {
+  if (likes > averageLikes) {
+    return 'high';
+  }
+  if (likes > 0) {
+    return 'medium';
+  }
+  return 'low';
+};
+
 export const registerRestRoutes = async (
   fastify: FastifyInstance,
   quoteService: QuoteService,
@@ -105,7 +115,7 @@ export const registerRestRoutes = async (
           isNew: false,
           totalQuotes,
           averageLikes: Math.round(averageLikes * 100) / 100,
-          popularity: quote.likes > averageLikes ? 'high' : quote.likes > 0 ? 'medium' : 'low',
+          popularity: getPopularityLevel(quote.likes, averageLikes),
         };
       }
 

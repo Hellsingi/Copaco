@@ -35,16 +35,16 @@ export const SimilarQuotesRequestSchema = z.object({
 });
 
 export const RandomQuoteQuerySchema = z.object({
-  preferLiked: z.string().transform((val: string) => val === 'true').default('false'),
+  preferLiked: z.string().default('false').transform((val: string) => val === 'true'),
 });
 
 export const RecommendedQuoteQuerySchema = z.object({
-  preferLiked: z.string().optional().transform((val) => val === 'true'),
+  preferLiked: z.string().optional().transform((val) => val ? val === 'true' : false),
 });
 
 export const SmartQuoteQuerySchema = z.object({
-  preferLiked: z.string().optional().transform((val) => val === 'true'),
-  includeStats: z.string().optional().transform((val) => val === 'true'),
+  preferLiked: z.string().optional().transform((val) => val ? val === 'true' : false),
+  includeStats: z.string().optional().transform((val) => val ? val === 'true' : false),
   category: z.string().optional(),
 });
 
