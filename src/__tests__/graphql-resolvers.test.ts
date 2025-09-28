@@ -2,7 +2,6 @@ import { createResolvers } from '../graphql/resolvers';
 import { QuoteService } from '../quote-service';
 import { DatabaseService } from '../database-service';
 
-// Mock the services
 jest.mock('../quote-service');
 jest.mock('../database-service');
 

@@ -13,7 +13,6 @@ export class QuoteService {
   }
 
   private calculateSimilarity(text1: string, text2: string): number {
-    // Tokenize both texts and calculate similarity based on common words
     const tokens1 = this.tokenizeAndStem(text1);
     const tokens2 = this.tokenizeAndStem(text2);
 
@@ -47,7 +46,6 @@ export class QuoteService {
 
   async findSimilarQuotes(inputQuote: string, limit: number = 5): Promise<Quote[]> {
     try {
-      // Fetch multiple quotes to compare against
       const response = await axios.get(this.quotableSearchUrl, {
         timeout: 5000,
         params: {
@@ -66,17 +64,15 @@ export class QuoteService {
         updatedAt: new Date(),
       }));
 
-      // Calculate similarity scores
       const quotesWithSimilarity: QuoteWithSimilarity[] = quotes.map((quote: Quote) => ({
         ...quote,
         similarity: this.calculateSimilarity(inputQuote, quote.content),
       }));
 
-      // Sort by similarity (descending) and return top matches
       return quotesWithSimilarity
         .sort((a: QuoteWithSimilarity, b: QuoteWithSimilarity) => b.similarity - a.similarity)
         .slice(0, limit)
-        .filter((quote: QuoteWithSimilarity) => quote.similarity > 0.2) // Only return quotes with reasonable similarity
+        .filter((quote: QuoteWithSimilarity) => quote.similarity > 0.2)
         .map((quoteWithSim) => ({
           id: quoteWithSim.id,
           content: quoteWithSim.content,
@@ -86,7 +82,7 @@ export class QuoteService {
           source: quoteWithSim.source,
           createdAt: quoteWithSim.createdAt,
           updatedAt: quoteWithSim.updatedAt,
-        })); // Remove similarity from final result
+        }));
 
     } catch (error) {
       this.log(`Failed to fetch similar quotes: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -7,12 +7,10 @@ export const registerRestRoutes = async (
   quoteService: QuoteService,
   dbService: DatabaseService,
 ): Promise<void> => {
-  // Health check endpoint
   fastify.get('/health', async () => {
     return { status: 'ok', timestamp: new Date().toISOString() };
   });
 
-  // Get random quote
   fastify.get('/api/quote/random', async (request, reply) => {
     try {
       const quote = await quoteService.fetchRandomQuote();
@@ -27,7 +25,6 @@ export const registerRestRoutes = async (
     }
   });
 
-  // Get recommended quote
   fastify.get('/api/quote/recommended', async (request, reply) => {
     const query = request.query as { preferLiked?: string };
     const preferLiked = query.preferLiked === 'true';
@@ -51,7 +48,6 @@ export const registerRestRoutes = async (
     }
   });
 
-  // Get smart quote with optional stats
   fastify.get('/api/quote/smart', async (request, reply) => {
     const query = request.query as {
       preferLiked?: string;
@@ -107,7 +103,6 @@ export const registerRestRoutes = async (
     }
   });
 
-  // Like a quote
   fastify.post('/api/quote/:id/like', async (request, reply) => {
     const { id } = request.params as { id: string };
     try {
@@ -122,7 +117,6 @@ export const registerRestRoutes = async (
     }
   });
 
-  // Get liked quotes
   fastify.get('/api/quotes/liked', async (request, reply) => {
     try {
       const quotes = await dbService.getMostLikedQuotes(10);
@@ -136,7 +130,6 @@ export const registerRestRoutes = async (
     }
   });
 
-  // Find similar quotes
   fastify.post('/api/quotes/similar', async (request, reply) => {
     const { content, limit = 5 } = request.body as { content: string; limit?: number };
 

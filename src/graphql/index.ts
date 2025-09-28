@@ -15,7 +15,7 @@ export const registerGraphQL = async (
   await fastify.register(mercurius, {
     schema,
     resolvers,
-    graphiql: true, // Enable GraphiQL interface at /graphiql
-    path: '/graphql', // GraphQL endpoint
+    graphiql: true,
+    path: '/graphql',
   });
 };
