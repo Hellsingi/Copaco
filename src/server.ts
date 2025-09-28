@@ -4,6 +4,14 @@ import { DatabaseService } from './database-service';
 import { registerGraphQL } from './graphql';
 import { registerRestRoutes } from './routes';
 
+const getRestPort = (): number => {
+  return process.env.REST_PORT ? parseInt(process.env.REST_PORT) : 3000;
+};
+
+const getGraphQLPort = (): number => {
+  return process.env.GRAPHQL_PORT ? parseInt(process.env.GRAPHQL_PORT) : 3001;
+};
+
 const restApp = Fastify({
   logger: { level: 'info' },
 });
@@ -29,7 +37,7 @@ const startRestServer = async (): Promise<void> => {
   try {
     await registerRestRoutes(restApp, quoteService, dbService);
 
-    const restPort = process.env.REST_PORT ? parseInt(process.env.REST_PORT) : 3000;
+    const restPort = getRestPort();
     await restApp.listen({ port: restPort, host: '0.0.0.0' });
 
     restApp.log.info(`REST API Server running on http://localhost:${restPort}`);
@@ -45,7 +53,7 @@ const startGraphQLServer = async (): Promise<void> => {
   try {
     await registerGraphQL(graphqlApp, quoteService, dbService);
 
-    const graphqlPort = process.env.GRAPHQL_PORT ? parseInt(process.env.GRAPHQL_PORT) : 3001;
+    const graphqlPort = getGraphQLPort();
     await graphqlApp.listen({ port: graphqlPort, host: '0.0.0.0' });
 
     graphqlApp.log.info(`GraphQL Server running on http://localhost:${graphqlPort}`);
@@ -60,13 +68,13 @@ const startGraphQLServer = async (): Promise<void> => {
 const start = async (): Promise<void> => {
   await initializeServices();
 
-  const restPort = process.env.REST_PORT ? parseInt(process.env.REST_PORT) : 3000;
-  const graphqlPort = process.env.GRAPHQL_PORT ? parseInt(process.env.GRAPHQL_PORT) : 3001;
-
   await Promise.all([
     startRestServer(),
     startGraphQLServer(),
   ]);
+
+  const restPort = getRestPort();
+  const graphqlPort = getGraphQLPort();
 
   restApp.log.info('Both servers are running successfully!');
   restApp.log.info('API Summary:');

@@ -131,7 +131,8 @@ export const registerRestRoutes = async (
   });
 
   fastify.post('/api/quotes/similar', async (request, reply) => {
-    const { content, limit = 5 } = request.body as { content: string; limit?: number };
+    const body = request.body as { content: string; limit?: string | number };
+    const { content } = body;
 
     if (!content || typeof content !== 'string') {
       return reply.status(400).send({
@@ -141,7 +142,9 @@ export const registerRestRoutes = async (
       });
     }
 
-    if (limit && (typeof limit !== 'number' || limit < 1 || limit > 20)) {
+    const limit = body.limit ? parseInt(String(body.limit), 10) : 5;
+
+    if (isNaN(limit) || limit < 1 || limit > 20) {
       return reply.status(400).send({
         error: 'Bad Request',
         message: 'Limit must be a number between 1 and 20',

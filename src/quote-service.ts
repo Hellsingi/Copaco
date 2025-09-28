@@ -8,6 +8,8 @@ export class QuoteService {
   private readonly dummyJsonUrl = 'https://dummyjson.com/quotes';
   private readonly quotableSearchUrl = 'https://api.quotable.io/quotes';
 
+  private readonly dummyJsonMaxQuotes = 30; // Conservative estimate to avoid 404s
+
   private log(message: string): void {
     process.stdout.write(`[QuoteService] ${message}\n`);
   }
@@ -113,7 +115,8 @@ export class QuoteService {
       this.log(`Quotable.io failed (${errorMessage}), trying DummyJSON...`);
 
       try {
-        const response = await axios.get(`${this.dummyJsonUrl}/${Math.floor(Math.random() * 100) + 1}`, {
+        const quoteId = Math.floor(Math.random() * this.dummyJsonMaxQuotes) + 1;
+        const response = await axios.get(`${this.dummyJsonUrl}/${quoteId}`, {
           timeout: 5000,
         });
 

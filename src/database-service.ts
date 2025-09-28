@@ -8,6 +8,10 @@ export class DatabaseService {
     this.db = new sqlite3.Database(dbPath);
   }
 
+  private log(message: string): void {
+    process.stdout.write(`[DatabaseService] ${message}\n`);
+  }
+
   async initialize(): Promise<void> {
     return this.initializeDatabase();
   }
@@ -29,10 +33,10 @@ export class DatabaseService {
     return new Promise((resolve, reject) => {
       this.db.run(createQuotesTable, (err) => {
         if (err) {
-          console.error('Error creating quotes table:', err);
+          this.log(`Error creating quotes table: ${err.message}`);
           reject(err);
         } else {
-          console.log('Database initialized successfully');
+          this.log('Database initialized successfully');
           resolve();
         }
       });

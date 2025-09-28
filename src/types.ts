@@ -37,9 +37,3 @@ export const SimilarQuotesRequestSchema = z.object({
 export const RandomQuoteQuerySchema = z.object({
   preferLiked: z.string().transform((val: string) => val === 'true').default('false'),
 });
-
-export const ErrorResponseSchema = z.object({
-  error: z.string(),
-  message: z.string(),
-  statusCode: z.number(),
-});
