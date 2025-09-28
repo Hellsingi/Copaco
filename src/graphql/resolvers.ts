@@ -1,6 +1,6 @@
 import { QuoteService } from '../quote-service';
 import { DatabaseService } from '../database-service';
-import { SmartQuoteArgs, PopularQuotesArgs, LikeQuoteArgs } from './types';
+import { SmartQuoteArgs, PopularQuotesArgs, LikeQuoteArgs, SimilarQuotesArgs } from './types';
 
 export const createResolvers = (quoteService: QuoteService, dbService: DatabaseService) => ({
   Query: {
@@ -22,6 +22,10 @@ export const createResolvers = (quoteService: QuoteService, dbService: DatabaseS
 
     popularQuotes: async (_: unknown, { limit = 10 }: PopularQuotesArgs) => {
       return await dbService.getMostLikedQuotes(limit);
+    },
+
+    similarQuotes: async (_: unknown, { content, limit = 5 }: SimilarQuotesArgs) => {
+      return await quoteService.findSimilarQuotes(content, limit);
     },
 
     stats: async () => {

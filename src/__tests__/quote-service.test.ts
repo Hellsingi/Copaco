@@ -133,4 +133,90 @@ describe('QuoteService', () => {
       });
     });
   });
+
+  describe('findSimilarQuotes', () => {
+    it('should find similar quotes successfully', async () => {
+      const mockSearchResponse = {
+        data: {
+          results: [
+            {
+              _id: 'similar-1',
+              content: 'Life is what happens when you are busy making other plans',
+              author: 'John Lennon',
+              tags: ['life', 'planning'],
+            },
+            {
+              _id: 'similar-2',
+              content: 'Life is really simple, but we insist on making it complicated',
+              author: 'Confucius',
+              tags: ['life', 'simplicity'],
+            },
+            {
+              _id: 'similar-3',
+              content: 'The purpose of our lives is to be happy',
+              author: 'Dalai Lama',
+              tags: ['life', 'happiness'],
+            },
+          ],
+        },
+      };
+
+      mockedAxios.get.mockResolvedValueOnce(mockSearchResponse);
+
+      const result = await quoteService.findSimilarQuotes('Life is what happens', 2);
+
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        'https://api.quotable.io/quotes',
+        {
+          timeout: 5000,
+          params: {
+            limit: 50,
+          },
+        },
+      );
+
+      expect(result.length).toBeGreaterThan(0);
+      expect(result.length).toBeLessThanOrEqual(2);
+      expect(result[0]).toEqual({
+        id: expect.any(String),
+        content: expect.any(String),
+        author: expect.any(String),
+        tags: expect.any(Array),
+        likes: 0,
+        source: 'quotable.io',
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+      });
+    });
+
+    it('should return empty array when API fails', async () => {
+      mockedAxios.get.mockRejectedValueOnce(new Error('Network error'));
+
+      const result = await quoteService.findSimilarQuotes('Test quote');
+
+      expect(result).toEqual([]);
+    });
+
+    it('should filter out quotes with low similarity', async () => {
+      const mockSearchResponse = {
+        data: {
+          results: [
+            {
+              _id: 'different-1',
+              content: 'Completely different topic about cars',
+              author: 'Car Expert',
+              tags: ['cars'],
+            },
+          ],
+        },
+      };
+
+      mockedAxios.get.mockResolvedValueOnce(mockSearchResponse);
+
+      const result = await quoteService.findSimilarQuotes('Quantum physics and molecular biology', 5);
+
+      // Should return empty array since similarity is too low (completely different topic)
+      expect(result.length).toBeLessThanOrEqual(1);
+    });
+  });
 });

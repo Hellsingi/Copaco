@@ -25,6 +25,7 @@ export const schema = `
     randomQuote: Quote!
     smartQuote(preferLiked: Boolean): Quote!
     popularQuotes(limit: Int): [Quote!]!
+    similarQuotes(content: String!, limit: Int): [Quote!]!
     stats: Stats!
   }
 

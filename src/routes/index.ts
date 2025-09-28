@@ -135,4 +135,40 @@ export const registerRestRoutes = async (
       });
     }
   });
+
+  // Find similar quotes
+  fastify.post('/api/quotes/similar', async (request, reply) => {
+    const { content, limit = 5 } = request.body as { content: string; limit?: number };
+
+    if (!content || typeof content !== 'string') {
+      return reply.status(400).send({
+        error: 'Bad Request',
+        message: 'Content is required and must be a string',
+        statusCode: 400,
+      });
+    }
+
+    if (limit && (typeof limit !== 'number' || limit < 1 || limit > 20)) {
+      return reply.status(400).send({
+        error: 'Bad Request',
+        message: 'Limit must be a number between 1 and 20',
+        statusCode: 400,
+      });
+    }
+
+    try {
+      const similarQuotes = await quoteService.findSimilarQuotes(content, limit);
+      return {
+        quotes: similarQuotes,
+        total: similarQuotes.length,
+        searchText: content,
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        error: 'Internal Server Error',
+        message: 'Failed to find similar quotes',
+        statusCode: 500,
+      });
+    }
+  });
 };

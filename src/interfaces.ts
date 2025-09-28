@@ -52,6 +52,10 @@ export interface SimilarQuotesRequest {
   limit?: number;
 }
 
+export interface QuoteWithSimilarity extends Quote {
+  similarity: number;
+}
+
 export interface RandomQuoteQuery {
   preferLiked?: boolean;
 }
