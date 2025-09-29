@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-// External API response schemas
+const stringToBooleanSchema = () =>
+  z.string().optional().transform((val) => val ? val === 'true' : false);
+
+const stringToBooleanWithDefaultSchema = (defaultValue: string) =>
+  z.string().default(defaultValue).transform((val: string) => val === 'true');
+
 export const ExternalQuoteSchema = z.object({
   _id: z.string(),
   content: z.string(),
@@ -15,7 +20,6 @@ export const DummyJsonQuoteSchema = z.object({
   author: z.string(),
 });
 
-// Internal quote schema
 export const QuoteSchema = z.object({
   id: z.string(),
   content: z.string(),
@@ -27,7 +31,6 @@ export const QuoteSchema = z.object({
   updatedAt: z.date(),
 });
 
-// API request/response schemas
 export const LikeQuoteRequestSchema = z.object({
   quoteId: z.string(),
 });
@@ -38,22 +41,28 @@ export const SimilarQuotesRequestSchema = z.object({
 });
 
 export const RandomQuoteQuerySchema = z.object({
-  preferLiked: z.string().transform((val: string) => val === 'true').default('false'),
+  preferLiked: stringToBooleanWithDefaultSchema('false'),
 });
 
-// Types
-export type ExternalQuote = z.infer<typeof ExternalQuoteSchema>;
-export type DummyJsonQuote = z.infer<typeof DummyJsonQuoteSchema>;
-export type Quote = z.infer<typeof QuoteSchema>;
-export type LikeQuoteRequest = z.infer<typeof LikeQuoteRequestSchema>;
-export type SimilarQuotesRequest = z.infer<typeof SimilarQuotesRequestSchema>;
-export type RandomQuoteQuery = z.infer<typeof RandomQuoteQuerySchema>;
-
-// Error schemas
-export const ErrorResponseSchema = z.object({
-  error: z.string(),
-  message: z.string(),
-  statusCode: z.number(),
+export const RecommendedQuoteQuerySchema = z.object({
+  preferLiked: stringToBooleanSchema(),
 });
 
-export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
+export const SmartQuoteQuerySchema = z.object({
+  preferLiked: stringToBooleanSchema(),
+  includeStats: stringToBooleanSchema(),
+  category: z.string().optional(),
+});
+
+export const SimilarQuotesRequestBodySchema = z.object({
+  content: z.string().min(1, 'Content is required and cannot be empty'),
+  limit: z.union([z.string(), z.number()]).optional()
+    .transform((val) => val ? parseInt(String(val), 10) : 5)
+    .refine((val) => !isNaN(val) && val >= 1 && val <= 20, {
+      message: 'Limit must be a number between 1 and 20',
+    }),
+});
+
+export const LikeQuoteParamsSchema = z.object({
+  id: z.string().min(1, 'Quote ID is required'),
+});
