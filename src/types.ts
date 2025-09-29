@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+const stringToBooleanSchema = () =>
+  z.string().optional().transform((val) => val ? val === 'true' : false);
+
+const stringToBooleanWithDefaultSchema = (defaultValue: string) =>
+  z.string().default(defaultValue).transform((val: string) => val === 'true');
+
 export const ExternalQuoteSchema = z.object({
   _id: z.string(),
   content: z.string(),
@@ -35,16 +41,16 @@ export const SimilarQuotesRequestSchema = z.object({
 });
 
 export const RandomQuoteQuerySchema = z.object({
-  preferLiked: z.string().default('false').transform((val: string) => val === 'true'),
+  preferLiked: stringToBooleanWithDefaultSchema('false'),
 });
 
 export const RecommendedQuoteQuerySchema = z.object({
-  preferLiked: z.string().optional().transform((val) => val ? val === 'true' : false),
+  preferLiked: stringToBooleanSchema(),
 });
 
 export const SmartQuoteQuerySchema = z.object({
-  preferLiked: z.string().optional().transform((val) => val ? val === 'true' : false),
-  includeStats: z.string().optional().transform((val) => val ? val === 'true' : false),
+  preferLiked: stringToBooleanSchema(),
+  includeStats: stringToBooleanSchema(),
   category: z.string().optional(),
 });
 
